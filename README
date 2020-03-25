@@ -1,7 +1,7 @@
-A python script to check some stats on the virus. While there are excellent resources both more informative and more appealing than this script, I wanted something more personalized (to keep daily track of India and Califoria :-/). Please feel free to customize as you see fit.
+A python script to check some stats on the virus. While there are excellent resources both more informative and more appealing than this script, I wanted something more personalized (to keep daily track of India and US:-/). Please feel free to customize as you see fit.
 
 
-The script relies on the dataset - https://github.com/CSSEGISandData/COVID-19 and requires the following directory structure. COVID_DIR is defined inside covid.py and need to point to the top level directory of the dataset.
+The script relies on the dataset - https://github.com/CSSEGISandData/COVID-19 and requires the following directory structure. COVID_DIR is defined inside covid.py and need to point to the top level directory of the dataset. Files marked as * are used by the script.
 
 covid.py
 COVID_DIR
@@ -12,14 +12,14 @@ COVID_DIR
 │   │   ├── time_series_19-covid-Confirmed.csv
 │   │   ├── time_series_19-covid-Deaths.csv
 │   │   ├── time_series_19-covid-Recovered.csv
-│   │   ├── time_series_covid19_confirmed_global.csv
+│   │   ├── time_series_covid19_confirmed_global.csv*
 │   │   └── time_series_covid19_deaths_global.csv
 │   └── README.md
 
 
 You can obtain the dataset by running git clone https://github.com/CSSEGISandData/COVID-19  
 
-The script has been tested on python 3.6.10 and requires numpy
+The script has been tested on python 3.6.10 on linux and requires numpy
 
 
 usage: covid.py [-h] [--plot PLOT] [--country COUNTRY] [--start START]
@@ -37,8 +37,6 @@ optional arguments:
   --plotxkcd           plot xkcd style
 
 Some quirks and bugs:
-Does not support stats for entire US. US data in the dataset is provided at state and county level which needs additional effort to parse.
-U.S. state level stats are supported with keywords such as - California, "New York" (quotes needed due to space), Washington,US (to differentiate from Washington,D.C.)
-Some countrynames in the dataset have quotes, for example, "Korea, South". Such entries are not supported yet.
+Countries with spaces in their names need to be passed within quotes e.g. "Korea, South"
 Its not thoroughly tested, so more bugs can be expected
 

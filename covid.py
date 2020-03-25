@@ -8,9 +8,8 @@ import os
 class Covid():
     #Dataset Dependent Constants
     COVID_DIR='COVID-19'
-    CNF_FILE=os.path.join(COVID_DIR,'csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv')
-    DT_FILE=os.path.join(COVID_DIR,'csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Deaths.csv')
-    REC_FILE=os.path.join(COVID_DIR,'csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Recovered.csv')
+    CNF_FILE=os.path.join(COVID_DIR,'csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv')
+    DT_FILE=os.path.join(COVID_DIR,'csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv')
 
 
     #Struct for filenames
@@ -19,7 +18,6 @@ class Covid():
 
     ftypes.cnf = CNF_FILE
     ftypes.dt = DT_FILE
-    ftypes.rec = REC_FILE
 
     #struct for relevant indices from the dataset
     class lindices:
@@ -28,6 +26,7 @@ class Covid():
     lindices.state = 0
     lindices.country = 1
     lindices.start = 4
+    lindices.startc = 5 #start location for countries with comma
 
     #class level variables (static in c++)
     gcountry = None
@@ -39,7 +38,8 @@ class Covid():
     #read_csv a global function which fills x_all_data, y_all_data
     @staticmethod
     def read_csv():
-        countryregex = Covid.gcountry+"," 
+        countryregex1 = Covid.gcountry+","
+        countryregex2 = '"' + Covid.gcountry + '"' + ','
         entries = None
 
         f = open(Covid.ftypes.cnf, 'r')
@@ -47,16 +47,23 @@ class Covid():
 
         Covid.x_all_data = header.rstrip('\n').split(',')[Covid.lindices.start:]
 
+
         for line in f:
-            if re.search(countryregex, line):
+            if re.search(countryregex1, line) or re.search(countryregex2, line):
                 mline = line.rstrip('\n').split(',')
-                matched_entries = [int(i) for i in mline[Covid.lindices.start:]] 
+                if ',' in Covid.gcountry:
+                    matched_entries = [int(i) for i in mline[Covid.lindices.startc:]] 
+                else:
+                    matched_entries = [int(i) for i in mline[Covid.lindices.start:]] 
                 if entries is None:
                     entries = matched_entries
                 else:
                     for i in range(len(entries)):
                         entries[i] += matched_entries[i]
         Covid.y_all_data = entries 
+        if Covid.y_all_data is None:
+            print("Could not find the country/province name. Please check the name from the data file")
+            exit(0)
 
     def generate_y_new(self, start, end):
         y_data = [0] 
@@ -95,7 +102,6 @@ class Covid():
         self.plottype = plottype
         
         if Covid.x_all_data is None and Covid.y_all_data is None:
-            print("read_csv")
             Covid.read_csv()
     
         if start < 0:
@@ -133,11 +139,11 @@ class Covid():
             plt.plot(self.x_data, self.y_data, 'r--')
             plt.text(self.x_data[len(self.x_data)-1], self.y_data[len(self.y_data)-1], str(self.y_data[len(self.y_data)-1]))
         else:
-        #if self.plottype == 'bar':
             width = 0.8
             plt.bar(self.x_data, self.y_data, width)
             locs, labels = plt.xticks()
-            for x, y in zip(locs, self.y_data):
+            st = np.abs(((len(locs) % 2) - 1)) #the [st::2] ensures only alternate labels are printed to remove clutter. Also, st offset ensures that last label is printed.
+            for x, y in zip(locs[st::2], self.y_data[st::2]):
                 plt.text(x-width/2, y, str(np.round(y,2)))
 
         plt.xticks(xticks, x_vals)
